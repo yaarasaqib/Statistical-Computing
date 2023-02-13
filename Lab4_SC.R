@@ -115,4 +115,64 @@ for(i in t){
   est[which(t==i)]= mean(s)
   }
 plot(t,est,type="l",xlab="t",ylab=expression(M_x(t)),main="Plot of mgf")
+#############################################
+## ma,am solution
+
+par(mfrow=c(1,1))
+# Inv Gaussian density function
+dinvGaus <- function(x, lam, mu)
+{
+  # assuming x > 0 always
+  den <- sqrt(lam/(2 * pi * x^3)) * exp(-lam * (x-mu)^2/(2 * mu^2 * x))
+  return(den)
+}
+
+momInvG <- function(t, lam = 3, mu = 1, N = 1e4)
+{
+  samp <- rgamma(N, shape = 10, rate = 3)
+  #using the same sample for each t
+  ests <- numeric(length = length(t))
+  for(k in 1:length(t))
+  {
+    foo <- exp(t[k]*samp) * dinvGaus(samp, lam, mu)/dgamma(samp, shape = 10, rate = 3)
+    ests[k] <- mean(foo)
+  }
+  return(ests)
+}
+# the original grid won't work
+# using this grid
+t <- seq(-4, .6, length = 50)
+lam <- 3
+mu <- 1
+ests <- momInvG(t = t)
+truth <- exp(lam/mu* (1 - sqrt(1 - 2*mu^2 *t/lam)) )
+plot(t, ests, type = "l")
+lines(t, truth, col = "red")
+legend("topleft", legend = c("estimated", "true"), col = c("black", "red"), lty = 1)
+
+### different samples foe every t
+
+momInvG <- function(t, lam = 3, mu = 1, N = 1e4)
+{
+  #using the same sample for each t
+  ests <- numeric(length = length(t))
+  for(k in 1:length(t))
+  {
+    samp <- rgamma(N, shape = 10, rate = 3)
+    foo <- exp(t[k]*samp) * dinvGaus(samp, lam, mu)/dgamma(samp, shape = 10, rate = 3)
+    ests[k] <- mean(foo)
+  }
+  return(ests)
+}
+# the original grid won't work
+# using this grid
+t <- seq(-4, .6, length = 50)
+lam <- 3
+mu <- 1
+ests <- momInvG(t = t)
+truth <- exp(lam/mu* (1 - sqrt(1 - 2*mu^2 *t/lam)) )
+plot(t, ests, type = "l")
+lines(t, truth, col = "red")
+legend("topleft", legend = c("estimated", "true"), col = c("black", "red"), lty = 1)
+
 
