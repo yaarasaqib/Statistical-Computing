@@ -118,3 +118,109 @@ pi.rose <- 1/ (1 + exp( - sum(rose.x * beta.new)))
 
 pi.jack
 pi.rose
+
+
+
+## Implementing Gradient Ascent
+
+tol <- 1e-10
+compare <- 100
+iter <- 1
+
+# starting from the zero-vector
+grad.vec <- c() # will store gradients here
+beta.current <- rep(0, p)
+
+beta.new <- beta.current
+
+t <- 1
+while(compare > tol && iter < 1000){
+  iter <- iter + 1 # tracking iterations
+  gradient <- f.gradient(y, X, beta.current)
+  beta.new <- beta.current + t * gradient
+  grad.vec[iter] <- norm(gradient, "2")
+  beta.current <- beta.new
+  compare <- grad.vec[iter]
+}
+iter
+
+beta.new # GA last iterate.
+
+plot.ts(grad.vec)
+
+#In the above the learning rate is clearly too large, since ‖∇𝑙(𝛽)‖ oscillated the whole time. When this
+#happens, it typically means that the learning rate 𝑡 is too large.
+
+tol <- 1e-5
+compare <- 100
+iter <- 1
+
+# starting from the zero-vector
+grad.vec <- c() # will store gradients here
+beta.current <- rep(0, p)
+beta.new <- beta.current
+t <- .000007
+while(compare > tol && iter < 3e5)
+{
+  iter <- iter + 1 # tracking iterations
+  gradient <- f.gradient(y, X, beta.current)
+  beta.new <- beta.current + t * gradient
+  grad.vec[iter] <- norm(gradient, "2")
+  beta.current <- beta.new
+  compare <- grad.vec[iter]
+}
+iter
+beta.new # GA last iterate
+
+plot.ts(grad.vec) 
+
+
+## 7.6
+
+#install.packages("faraway")
+library(faraway)
+?motorins    # to know about the data
+
+
+set.seed(1)
+n <- 50
+p <- 5
+# generate covariates
+X <- cbind(1, matrix( rnorm(n*(p-1)), ncol = p-1, nrow = n))
+beta.star <- c(.1, .2, .1, .6, -.3)
+pi <- exp(X %*% beta.star)
+y <- rpois(n, pi) # generate response
+
+tol <- 1e-10
+compare <- 100
+iter <- 1
+# starting from the zero-vector
+grad.vec <- c() # will store gradients here
+foo <- glm(y ~ X - 1, family = poisson)
+beta.current <- rep(0, p)
+beta.new <- beta.current
+
+
+while(compare > tol)
+{
+  iter <- iter + 1 # tracking iterations
+  gradient <- f.gradient(y, X, beta.current)
+  hessian <- f.hessian(y, X, beta.current)
+  beta.new <- beta.current - qr.solve(hessian) %*% gradient
+  grad.vec[iter] <- norm(gradient, "2")
+  beta.current <- beta.new
+  compare <- grad.vec[iter]
+}
+iter
+
+beta.new # N-R last iterate.
+
+plot.ts(grad.vec)
+
+#Gradient Ascent algorithm.
+tol <- 1e-8
+compare <- 100
+iter <- 1
+
+
+
